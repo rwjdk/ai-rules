@@ -1,4 +1,3 @@
-using System.Linq;
 using BlazorApp.BusinessLogic;
 using BlazorApp.Data;
 using Microsoft.AspNetCore.Components;
@@ -9,13 +8,13 @@ namespace BlazorApp.Pages;
 public partial class Home : ComponentBase
 {
     [Inject]
-    private TodoService TodoService { get; set; } = default!;
+    private TodoService TodoService { get; set; } = null!;
 
     [Inject]
-    private IDialogService DialogService { get; set; } = default!;
+    private IDialogService DialogService { get; set; } = null!;
 
     [Inject]
-    private ISnackbar Snackbar { get; set; } = default!;
+    private ISnackbar Snackbar { get; set; } = null!;
 
     private MudDataGrid<TodoItem>? TodoGrid { get; set; }
 
@@ -82,11 +81,7 @@ public partial class Home : ComponentBase
         }
 
         PendingNewTodo =
-            new TodoItem
-            {
-                StartDate = DateTime.Today,
-                DueDate = DateTime.Today
-            };
+            new TodoItem();
 
         Todos.Insert(0, PendingNewTodo);
         await InvokeAsync(StateHasChanged);
@@ -127,14 +122,7 @@ public partial class Home : ComponentBase
                 return DataGridEditFormAction.Close;
             }
 
-            if (item.Id == 0)
-            {
-                Snackbar.Add("Task created.", Severity.Success);
-            }
-            else
-            {
-                Snackbar.Add("Task updated.", Severity.Success);
-            }
+            Snackbar.Add(item.Id == 0 ? "Task created." : "Task updated.", Severity.Success);
 
             PendingNewTodo = null;
             await LoadTodosAsync();
@@ -158,7 +146,7 @@ public partial class Home : ComponentBase
         }
 
         await LoadTodosAsync();
-        Snackbar.Add(result.Todo?.Completed == true ? "Task marked completed." : "Task reopened.", Severity.Normal);
+        Snackbar.Add(result.Todo?.Completed == true ? "Task marked completed." : "Task reopened.");
     }
 
     private async Task DeleteTodoAsync(int id, string title)
@@ -205,9 +193,11 @@ public partial class Home : ComponentBase
     }
 
     private static TodoUpsertRequest CreateRequest(TodoItem item) =>
-        new(
-            item.Title,
-            item.StartDate,
-            item.DueDate,
-            item.Completed);
+        new()
+        {
+            Title = item.Title,
+            StartDate = item.StartDate,
+            DueDate = item.DueDate,
+            Completed = item.Completed
+        };
 }

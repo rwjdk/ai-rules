@@ -17,6 +17,11 @@
     <MudDrawer @bind-Open="@DrawerOpen" ClipMode="DrawerClipMode.Always" Style="box-sizing: border-box !important;">
         <MudNavMenu>
             <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
+            <MudNavLink Href="@ApiEndpoints.ApiRoot"
+                        Icon="@Icons.Material.Filled.Api"
+                        Target="_blank">
+                API
+            </MudNavLink>
         </MudNavMenu>
     </MudDrawer>
     <MudMainContent Style="box-sizing: border-box !important;">

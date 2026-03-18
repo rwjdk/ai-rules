@@ -1,12 +1,24 @@
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using BlazorApp.Data;
 
 namespace BlazorApp.BusinessLogic;
 
-public sealed record TodoUpsertRequest(
-    string Title,
-    DateTime StartDate,
-    DateTime DueDate,
-    bool Completed);
+public sealed class TodoUpsertRequest
+{
+    [Required]
+    [StringLength(120)]
+    public string Title { get; init; } = string.Empty;
+
+    [DataType(DataType.Date)]
+    public DateTime? StartDate { get; init; }
+
+    [DataType(DataType.Date)]
+    public DateTime? DueDate { get; init; }
+
+    [DefaultValue(false)]
+    public bool Completed { get; init; } = false;
+}
 
 public enum TodoCommandStatus
 {

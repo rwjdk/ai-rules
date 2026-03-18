@@ -76,9 +76,10 @@
                                    Variant="Variant.Outlined"
                                    Margin="Margin.Dense"
                                    Editable="true"
+                                   Clearable="true"
                                    DateFormat="yyyy-MM-dd"
                                    Date="@context.Item.StartDate"
-                                   DateChanged="@(date => context.Item.StartDate = date ?? DateTime.Today)" />
+                                   DateChanged="@(date => context.Item.StartDate = date)" />
                 </EditTemplate>
             </PropertyColumn>
 
@@ -88,9 +89,10 @@
                                    Variant="Variant.Outlined"
                                    Margin="Margin.Dense"
                                    Editable="true"
+                                   Clearable="true"
                                    DateFormat="yyyy-MM-dd"
                                    Date="@context.Item.DueDate"
-                                   DateChanged="@(date => context.Item.DueDate = date ?? DateTime.Today)" />
+                                   DateChanged="@(date => context.Item.DueDate = date)" />
                 </EditTemplate>
             </PropertyColumn>
 

@@ -12,8 +12,8 @@ public sealed class TodoQuery(IDbContextFactory<TodoDbContext> dbContextFactory)
         return await dbContext.TodoItems
             .AsNoTracking()
             .OrderBy(todo => todo.Completed)
-            .ThenBy(todo => todo.DueDate)
-            .ThenBy(todo => todo.StartDate)
+            .ThenBy(todo => todo.DueDate ?? DateTime.MaxValue)
+            .ThenBy(todo => todo.StartDate ?? DateTime.MaxValue)
             .ThenBy(todo => todo.Title)
             .ToListAsync(cancellationToken);
     }

@@ -16,18 +16,18 @@ public sealed class TodoItem : IValidatableObject
 
     [Column(TypeName = "date")]
     [DataType(DataType.Date)]
-    public DateTime StartDate { get; set; } = DateTime.Today;
+    public DateTime? StartDate { get; set; }
 
     [Column(TypeName = "date")]
     [DataType(DataType.Date)]
-    public DateTime DueDate { get; set; } = DateTime.Today;
+    public DateTime? DueDate { get; set; }
 
     [DefaultValue(false)]
     public bool Completed { get; set; }
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
-        if (DueDate.Date < StartDate.Date)
+        if (StartDate.HasValue && DueDate.HasValue && DueDate.Value.Date < StartDate.Value.Date)
         {
             yield return new ValidationResult(
                 "Due date must be on or after the start date.",

@@ -1,6 +1,4 @@
-﻿using BlazorApp.Pages;
-
-namespace BlazorApp;
+﻿namespace BlazorApp;
 
 public static class PageRoutes
 {
@@ -11,10 +9,17 @@ public static class PageRoutes
 
 public static class ApiEndpoints
 {
+    public const string ApiRoot = "/api";
     public const string Todos = "/api/todos";
+    public const string OpenApiDocument = "/openapi/{documentName}.json";
+    public const string ScalarUi = ApiRoot;
+    public const string Mcp = "/mcp";
 }
 
 public static class McpToolNames
 {
-
+    public const string GetTasks = "get_tasks";
+    public const string AddTask = "add_task";
+    public const string UpdateTask = "update_task";
+    public const string RemoveTask = "remove_task";
 }

@@ -1,4 +1,3 @@
-using BlazorApp;
 using BlazorApp.BusinessLogic;
 using BlazorApp.Data;
 
@@ -49,7 +48,7 @@ public static class TodoApi
 
     private static IResult ToHttpResult(TodoCommandResult result, Func<TodoItem, IResult> onSuccess)
     {
-        if (result.Succeeded && result.Todo is not null)
+        if (result is { Succeeded: true, Todo: not null })
         {
             return onSuccess(result.Todo);
         }

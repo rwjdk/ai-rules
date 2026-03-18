@@ -3,10 +3,12 @@ using BlazorApp;
 using BlazorApp.BusinessLogic;
 using BlazorApp.Data;
 using BlazorApp.Layout;
+using BlazorApp.MCP;
 using BlazorApp.Repositories;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;
 using MudBlazor.Services;
+using Scalar.AspNetCore;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +19,10 @@ builder.Services.AddMudServices(configuration =>
 {
     configuration.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomLeft;
 });
+builder.Services.AddOpenApi();
+builder.Services.AddMcpServer()
+    .WithHttpTransport()
+    .WithTools<TodoMcpTools>();
 builder.Services.AddDbContextFactory<TodoDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("TodoApp")));
 builder.Services.AddScoped<TodoQuery>();
@@ -43,6 +49,13 @@ app.UseHttpsRedirection();
 
 app.UseAntiforgery();
 
+app.MapOpenApi();
+app.MapMcp(ApiEndpoints.Mcp);
+app.MapScalarApiReference(ApiEndpoints.ScalarUi, options =>
+{
+    options.WithTitle("Todo API")
+        .WithOpenApiRoutePattern(ApiEndpoints.OpenApiDocument);
+});
 app.MapTodoApi();
 app.MapStaticAssets();
 app.MapRazorComponents<App>()

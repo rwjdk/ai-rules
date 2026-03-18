@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using BlazorApp.Data;
 using BlazorApp.Repositories;
 
@@ -55,11 +54,13 @@ public sealed class TodoService(TodoQuery todoQuery, TodoCommand todoCommand)
         }
 
         TodoUpsertRequest request =
-            new(
-                existingTodo.Title,
-                existingTodo.StartDate,
-                existingTodo.DueDate,
-                completed);
+            new()
+            {
+                Title = existingTodo.Title,
+                StartDate = existingTodo.StartDate,
+                DueDate = existingTodo.DueDate,
+                Completed = completed
+            };
 
         return await UpdateAsync(id, request, cancellationToken);
     }
@@ -71,8 +72,8 @@ public sealed class TodoService(TodoQuery todoQuery, TodoCommand todoCommand)
         new()
         {
             Title = request.Title.Trim(),
-            StartDate = request.StartDate.Date,
-            DueDate = request.DueDate.Date,
+            StartDate = request.StartDate?.Date,
+            DueDate = request.DueDate?.Date,
             Completed = request.Completed
         };
 
