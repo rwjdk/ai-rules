@@ -24,7 +24,7 @@ builder.Services.AddMcpServer()
     .WithHttpTransport()
     .WithTools<TodoMcpTools>();
 builder.Services.AddDbContextFactory<TodoDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("TodoApp")));
+    options.UseSqlite(builder.Configuration.GetConnectionString("TodoApp")));
 builder.Services.AddScoped<TodoQuery>();
 builder.Services.AddScoped<TodoCommand>();
 builder.Services.AddScoped<TodoService>();

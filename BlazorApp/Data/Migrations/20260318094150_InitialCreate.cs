@@ -15,12 +15,12 @@ namespace BlazorApp.Data.Migrations
                 name: "TodoItems",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Title = table.Column<string>(type: "nvarchar(120)", maxLength: 120, nullable: false),
-                    StartDate = table.Column<DateTime>(type: "date", nullable: false),
-                    DueDate = table.Column<DateTime>(type: "date", nullable: false),
-                    Completed = table.Column<bool>(type: "bit", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Title = table.Column<string>(type: "TEXT", maxLength: 120, nullable: false),
+                    StartDate = table.Column<DateTime>(type: "date", nullable: true),
+                    DueDate = table.Column<DateTime>(type: "date", nullable: true),
+                    Completed = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
