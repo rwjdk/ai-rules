@@ -11,7 +11,7 @@ public static class PageRoutes
 
 public static class ApiEndpoints
 {
-
+    public const string Todos = "/api/todos";
 }
 
 public static class McpToolNames

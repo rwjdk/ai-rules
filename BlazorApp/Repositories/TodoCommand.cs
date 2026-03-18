@@ -28,8 +28,8 @@ public sealed class TodoCommand(IDbContextFactory<TodoDbContext> dbContextFactor
         }
 
         existingTodo.Title = todoItem.Title;
-        existingTodo.StartDate = todoItem.StartDate.Date;
-        existingTodo.DueDate = todoItem.DueDate.Date;
+        existingTodo.StartDate = todoItem.StartDate;
+        existingTodo.DueDate = todoItem.DueDate;
         existingTodo.Completed = todoItem.Completed;
 
         await dbContext.SaveChangesAsync(cancellationToken);

@@ -1,8 +1,11 @@
+using BlazorApp.API;
 using BlazorApp;
+using BlazorApp.BusinessLogic;
 using BlazorApp.Data;
 using BlazorApp.Layout;
 using BlazorApp.Repositories;
 using Microsoft.EntityFrameworkCore;
+using MudBlazor;
 using MudBlazor.Services;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -10,18 +13,22 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
-builder.Services.AddMudServices();
+builder.Services.AddMudServices(configuration =>
+{
+    configuration.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomLeft;
+});
 builder.Services.AddDbContextFactory<TodoDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("TodoApp")));
 builder.Services.AddScoped<TodoQuery>();
 builder.Services.AddScoped<TodoCommand>();
+builder.Services.AddScoped<TodoService>();
 WebApplication app = builder.Build();
 
 await using (AsyncServiceScope scope = app.Services.CreateAsyncScope())
 {
     IDbContextFactory<TodoDbContext> dbContextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<TodoDbContext>>();
     await using TodoDbContext dbContext = await dbContextFactory.CreateDbContextAsync();
-    await dbContext.Database.EnsureCreatedAsync();
+    await dbContext.Database.MigrateAsync();
 }
 
 // Configure the HTTP request pipeline.
@@ -36,6 +43,7 @@ app.UseHttpsRedirection();
 
 app.UseAntiforgery();
 
+app.MapTodoApi();
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();

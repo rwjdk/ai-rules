@@ -1,19 +1,15 @@
 using System.Linq;
-using System.ComponentModel.DataAnnotations;
-using BlazorApp.Repositories;
+using BlazorApp.BusinessLogic;
+using BlazorApp.Data;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
-using BlazorApp.Data;
 
 namespace BlazorApp.Pages;
 
 public partial class Home : ComponentBase
 {
     [Inject]
-    private TodoQuery TodoQuery { get; set; } = default!;
-
-    [Inject]
-    private TodoCommand TodoCommand { get; set; } = default!;
+    private TodoService TodoService { get; set; } = default!;
 
     [Inject]
     private IDialogService DialogService { get; set; } = default!;
@@ -25,11 +21,20 @@ public partial class Home : ComponentBase
 
     private List<TodoItem> Todos { get; set; } = [];
 
+    private IEnumerable<TodoItem> VisibleTodos =>
+        ShowCompletedTasks
+            ? Todos
+            : Todos.Where(todo => !todo.Completed);
+
     private TodoItem? PendingNewTodo { get; set; }
 
     private bool IsLoading { get; set; }
 
     private bool IsSaving { get; set; }
+
+    private bool ShowCompletedTasks { get; set; }
+
+    private string CompletedToggleLabel => ShowCompletedTasks ? "Hide Completed" : "Show Completed";
 
     private DialogOptions TodoDialogOptions { get; } =
         new()
@@ -42,9 +47,10 @@ public partial class Home : ComponentBase
 
     private int TotalCount => Todos.Count;
 
-    private int OpenCount => Todos.Count(todo => !todo.Completed);
-
-    private int CompletedCount => Todos.Count(todo => todo.Completed);
+    private string NoRecordsMessage =>
+        TotalCount == 0
+            ? "No todos yet. Use the New task button to create the first one."
+            : "No open todos. Turn on Show completed to view finished tasks.";
 
     protected override async Task OnInitializedAsync() => await LoadTodosAsync();
 
@@ -54,7 +60,7 @@ public partial class Home : ComponentBase
 
         try
         {
-            Todos = (await TodoQuery.GetAllAsync()).ToList();
+            Todos = (await TodoService.GetAllAsync()).ToList();
         }
         finally
         {
@@ -99,35 +105,34 @@ public partial class Home : ComponentBase
 
     private async Task<DataGridEditFormAction> CommitItemChangesAsync(TodoItem item)
     {
-        if (!TryValidateTodo(item, out string validationMessage))
-        {
-            Snackbar.Add(validationMessage, Severity.Error);
-            return DataGridEditFormAction.KeepOpen;
-        }
-
         IsSaving = true;
 
         try
         {
-            item.Title = item.Title.Trim();
+            TodoCommandResult result = item.Id == 0
+                ? await TodoService.CreateAsync(CreateRequest(item))
+                : await TodoService.UpdateAsync(item.Id, CreateRequest(item));
+
+            if (result.Status == TodoCommandStatus.ValidationFailed)
+            {
+                Snackbar.Add(string.Join(" ", result.Errors ?? []), Severity.Error);
+                return DataGridEditFormAction.KeepOpen;
+            }
+
+            if (result.Status == TodoCommandStatus.NotFound)
+            {
+                Snackbar.Add("That task no longer exists.", Severity.Warning);
+                PendingNewTodo = null;
+                await LoadTodosAsync();
+                return DataGridEditFormAction.Close;
+            }
 
             if (item.Id == 0)
             {
-                await TodoCommand.AddAsync(item);
                 Snackbar.Add("Task created.", Severity.Success);
             }
             else
             {
-                bool updated = await TodoCommand.UpdateAsync(item);
-
-                if (!updated)
-                {
-                    Snackbar.Add("That task no longer exists.", Severity.Warning);
-                    PendingNewTodo = null;
-                    await LoadTodosAsync();
-                    return DataGridEditFormAction.Close;
-                }
-
                 Snackbar.Add("Task updated.", Severity.Success);
             }
 
@@ -143,19 +148,9 @@ public partial class Home : ComponentBase
 
     private async Task ToggleCompletedAsync(TodoItem todo)
     {
-        TodoItem updatedTodo =
-            new()
-            {
-                Id = todo.Id,
-                Title = todo.Title,
-                StartDate = todo.StartDate,
-                DueDate = todo.DueDate,
-                Completed = !todo.Completed
-            };
+        TodoCommandResult result = await TodoService.SetCompletedAsync(todo.Id, !todo.Completed);
 
-        bool updated = await TodoCommand.UpdateAsync(updatedTodo);
-
-        if (!updated)
+        if (result.Status == TodoCommandStatus.NotFound)
         {
             Snackbar.Add("That task could not be updated.", Severity.Warning);
             await LoadTodosAsync();
@@ -163,7 +158,7 @@ public partial class Home : ComponentBase
         }
 
         await LoadTodosAsync();
-        Snackbar.Add(updatedTodo.Completed ? "Task marked completed." : "Task reopened.", Severity.Normal);
+        Snackbar.Add(result.Todo?.Completed == true ? "Task marked completed." : "Task reopened.", Severity.Normal);
     }
 
     private async Task DeleteTodoAsync(int id, string title)
@@ -179,7 +174,7 @@ public partial class Home : ComponentBase
             return;
         }
 
-        bool deleted = await TodoCommand.DeleteAsync(id);
+        bool deleted = await TodoService.DeleteAsync(id);
 
         if (!deleted)
         {
@@ -199,7 +194,7 @@ public partial class Home : ComponentBase
 
     private Task HandleCanceledEditingItem(TodoItem item)
     {
-        if (PendingNewTodo is not null && ReferenceEquals(item, PendingNewTodo))
+        if (PendingNewTodo is not null && PendingNewTodo.Id == 0 && item.Id == 0)
         {
             Todos.Remove(PendingNewTodo);
             PendingNewTodo = null;
@@ -209,22 +204,10 @@ public partial class Home : ComponentBase
         return Task.CompletedTask;
     }
 
-    private static bool TryValidateTodo(TodoItem item, out string validationMessage)
-    {
-        List<ValidationResult> validationResults = [];
-        ValidationContext validationContext = new(item);
-        bool isValid = Validator.TryValidateObject(item, validationContext, validationResults, validateAllProperties: true);
-
-        if (isValid)
-        {
-            validationMessage = string.Empty;
-            return true;
-        }
-
-        validationMessage = string.Join(" ", validationResults
-            .Select(result => result.ErrorMessage)
-            .Where(message => !string.IsNullOrWhiteSpace(message)));
-
-        return false;
-    }
+    private static TodoUpsertRequest CreateRequest(TodoItem item) =>
+        new(
+            item.Title,
+            item.StartDate,
+            item.DueDate,
+            item.Completed);
 }
