@@ -11,21 +11,20 @@ namespace BlazorApp.MCP;
 public sealed class TodoMcpTools
 {
     [McpServerTool(Name = McpToolNames.GetTasks), Description("Returns tasks from the Todo app. Completed tasks are excluded unless includeCompleted is true.")]
-    public static async Task<IReadOnlyList<TodoMcpTask>> GetTasks(
+    public static async Task<IReadOnlyList<TodoMcpTask>> GetTasksAsync(
         TodoService todoService,
         [Description("Set to true to include completed tasks in the result.")] bool includeCompleted = false,
         CancellationToken cancellationToken = default)
     {
         IReadOnlyList<TodoItem> todos = await todoService.GetAllAsync(cancellationToken);
 
-        return todos
+        return [.. todos
             .Where(todo => includeCompleted || !todo.Completed)
-            .Select(MapTask)
-            .ToArray();
+            .Select(MapTask)];
     }
 
     [McpServerTool(Name = McpToolNames.AddTask), Description("Adds a new task to the Todo app.")]
-    public static async Task<TodoMcpCommandResponse> AddTask(
+    public static async Task<TodoMcpCommandResponse> AddTaskAsync(
         TodoService todoService,
         [Description("The task title.")] string title,
         [Description("Optional start date for the task.")] DateTime? startDate = null,
@@ -47,7 +46,7 @@ public sealed class TodoMcpTools
     }
 
     [McpServerTool(Name = McpToolNames.UpdateTask), Description("Updates an existing task. Omitted fields keep their current values.")]
-    public static async Task<TodoMcpCommandResponse> UpdateTask(
+    public static async Task<TodoMcpCommandResponse> UpdateTaskAsync(
         TodoService todoService,
         [Description("The id of the task to update.")] int id,
         [Description("Optional replacement title. Leave empty to keep the current title.")] string? title = null,
@@ -80,7 +79,7 @@ public sealed class TodoMcpTools
     }
 
     [McpServerTool(Name = McpToolNames.RemoveTask), Description("Removes a task from the Todo app.")]
-    public static async Task<TodoMcpDeleteResponse> RemoveTask(
+    public static async Task<TodoMcpDeleteResponse> RemoveTaskAsync(
         TodoService todoService,
         [Description("The id of the task to remove.")] int id,
         CancellationToken cancellationToken = default)

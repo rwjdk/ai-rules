@@ -59,7 +59,7 @@ public partial class Home : ComponentBase
 
         try
         {
-            Todos = (await TodoService.GetAllAsync()).ToList();
+            Todos = [.. await TodoService.GetAllAsync()];
         }
         finally
         {

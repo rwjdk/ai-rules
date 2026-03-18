@@ -57,7 +57,7 @@ public static class TodoApi
         {
             Dictionary<string, string[]> errors = new()
             {
-                ["todo"] = (result.Errors ?? []).ToArray()
+                ["todo"] = [.. (result.Errors ?? [])]
             };
 
             return TypedResults.ValidationProblem(errors);
