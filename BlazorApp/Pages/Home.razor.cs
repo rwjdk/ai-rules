@@ -81,7 +81,7 @@ public partial class Home : ComponentBase
         }
 
         PendingNewTodo =
-            new TodoItem();
+            new();
 
         Todos.Insert(0, PendingNewTodo);
         await InvokeAsync(StateHasChanged);

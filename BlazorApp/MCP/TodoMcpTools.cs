@@ -33,7 +33,7 @@ public sealed class TodoMcpTools
         CancellationToken cancellationToken = default)
     {
         TodoCommandResult result = await todoService.CreateAsync(
-            new TodoUpsertRequest
+            new()
             {
                 Title = title,
                 StartDate = startDate,
@@ -61,12 +61,12 @@ public sealed class TodoMcpTools
 
         if (existingTodo is null)
         {
-            return new TodoMcpCommandResponse(false, $"Task {id} was not found.");
+            return new(false, $"Task {id} was not found.");
         }
 
         TodoCommandResult result = await todoService.UpdateAsync(
             id,
-            new TodoUpsertRequest
+            new()
             {
                 Title = title ?? existingTodo.Title,
                 StartDate = clearStartDate ? null : startDate ?? existingTodo.StartDate,
@@ -87,23 +87,23 @@ public sealed class TodoMcpTools
         bool deleted = await todoService.DeleteAsync(id, cancellationToken);
 
         return deleted
-            ? new TodoMcpDeleteResponse(true, "Task removed.", id)
-            : new TodoMcpDeleteResponse(false, $"Task {id} was not found.", id);
+            ? new(true, "Task removed.", id)
+            : new(false, $"Task {id} was not found.", id);
     }
 
     private static TodoMcpCommandResponse ToCommandResponse(TodoCommandResult result, string successMessage)
     {
         if (result is { Succeeded: true, Todo: not null })
         {
-            return new TodoMcpCommandResponse(true, successMessage, MapTask(result.Todo));
+            return new(true, successMessage, MapTask(result.Todo));
         }
 
         if (result.Status == TodoCommandStatus.ValidationFailed)
         {
-            return new TodoMcpCommandResponse(false, "Task validation failed.", null, result.Errors ?? []);
+            return new(false, "Task validation failed.", null, result.Errors ?? []);
         }
 
-        return new TodoMcpCommandResponse(false, "Task was not found.");
+        return new(false, "Task was not found.");
     }
 
     private static TodoMcpTask MapTask(TodoItem todo) =>

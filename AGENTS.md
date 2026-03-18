@@ -50,7 +50,6 @@ ai-rules
 - Do not require `this.` qualification for fields, properties, methods, or events.
 - Always make namespaces match the folder structure.
 - Private fields should be prefixed with `_` to limit the need for `this`.
-- Don't add XML summaries and trivial comments (this is an internal project).
 - Always place private classes at the bottom of parent classes.
 - Always make methods that have the `async` keyword use the `Async` suffix (example: correct `async Task SaveAsync`, wrong `async Task Save`).
 - Clean up temporary files you create while coding.

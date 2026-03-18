@@ -27,9 +27,9 @@ public sealed class TodoItem : IValidatableObject
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
-        if (StartDate.HasValue && DueDate.HasValue && DueDate.Value.Date < StartDate.Value.Date)
+        if (StartDate is { } startDate && DueDate is { } dueDate && dueDate.Date < startDate.Date)
         {
-            yield return new ValidationResult(
+            yield return new(
                 "Due date must be on or after the start date.",
                 [nameof(DueDate)]);
         }

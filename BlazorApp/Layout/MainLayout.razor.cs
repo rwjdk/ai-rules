@@ -1,4 +1,4 @@
-﻿namespace BlazorApp.Layout;
+namespace BlazorApp.Layout;
 
 public partial class MainLayout
 {

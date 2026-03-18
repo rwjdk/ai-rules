@@ -1,4 +1,4 @@
-﻿namespace BlazorApp;
+namespace BlazorApp;
 
 public static class PageRoutes
 {
