@@ -3,5 +3,9 @@
     <File Path=".editorconfig" />
     <File Path="AGENTS.md" />
   </Folder>
+  <Folder Name="/Solution Items/skills/" />
+  <Folder Name="/Solution Items/skills/add-api-endpoint/">
+    <File Path=".agents/skills/add-api-endpoint/SKILL.md" />
+  </Folder>
   <Project Path="BlazorApp/BlazorApp.csproj" />
 </Solution>
